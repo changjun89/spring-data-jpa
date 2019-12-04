@@ -2,23 +2,41 @@ package me.changjun.jpa.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(of = {"id", "username", "name"})
 public class Member {
 
     @Id
     @GeneratedValue
+    @Column(name = "member_id")
     private long id;
-    private String userName;
+    private String username;
+    private int age;
 
-    public Member(String userName) {
-        this.userName = userName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    public Member(String username) {
+        this.username = username;
+    }
+
+    public Member(String username, int age, Team team) {
+        this.username = username;
+        this.age = age;
+        if (team != null) {
+            changeTeam(team);
+        }
+    }
+
+    public void changeTeam(Team team) {
+        this.team = team;
+        team.getMembers().add(this);
     }
 }

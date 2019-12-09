@@ -1,5 +1,6 @@
 package me.changjun.jpa.repository;
 
+import me.changjun.jpa.dto.MemberDto;
 import me.changjun.jpa.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,4 +14,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("select m from Member m where m.username = :username and m.age = :age")
     List<Member> findUser(@Param("username") String username, @Param("age") int age);
+
+    @Query("select m.username from Member m")
+    List<String> findUserNameList();
+
+    @Query("select new me.changjun.jpa.dto.MemberDto(m.id,m.username,t.name) from Member m join m.team t")
+    List<MemberDto> findMemberDto();
 }

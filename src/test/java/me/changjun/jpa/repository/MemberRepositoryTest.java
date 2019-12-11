@@ -6,6 +6,10 @@ import me.changjun.jpa.entity.Team;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,5 +158,45 @@ class MemberRepositoryTest {
         assertThat(listMember.get(0).getUsername()).isEqualTo("AAA");
         assertThat(member.getUsername()).isEqualTo("AAA");
         assertThat(optionalMember.get().getUsername()).isEqualTo("AAA");
+    }
+
+    @Test
+    void paging() {
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        Page<Member> byAge = memberRepository.findByAge(age, pageRequest);
+
+        Page<MemberDto> toMap = byAge.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+
+        assertThat(byAge.getContent().size()).isEqualTo(3);
+        assertThat(byAge.getTotalElements()).isEqualTo(5);
+        assertThat(byAge.getTotalPages()).isEqualTo(2);
+        assertThat(byAge.isFirst()).isEqualTo(true);
+        assertThat(byAge.hasNext()).isEqualTo(true);
+    }
+
+    @Test
+    void pagingSlice() {
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        Slice<Member> byAge = memberRepository.findSliceByAge(age, pageRequest);
+
+        assertThat(byAge.getContent().size()).isEqualTo(3);
+        assertThat(byAge.isFirst()).isEqualTo(true);
+        assertThat(byAge.hasNext()).isEqualTo(true);
     }
 }

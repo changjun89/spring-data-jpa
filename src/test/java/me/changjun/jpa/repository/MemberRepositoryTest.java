@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,8 @@ class MemberRepositoryTest {
     MemberRepository memberRepository;
     @Autowired
     TeamRepository teamRepository;
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     void testMember() {
@@ -198,5 +202,20 @@ class MemberRepositoryTest {
         assertThat(byAge.getContent().size()).isEqualTo(3);
         assertThat(byAge.isFirst()).isEqualTo(true);
         assertThat(byAge.hasNext()).isEqualTo(true);
+    }
+
+    @Test
+    void bulkUpdate() {
+        memberRepository.save(new Member("member1",10));
+        memberRepository.save(new Member("member2",19));
+        memberRepository.save(new Member("member3",20));
+        memberRepository.save(new Member("member4",21));
+        memberRepository.save(new Member("member5",40));
+
+        int resultCount = memberRepository.bulkAgePlus(20);
+        Member member5 = memberRepository.findListByUsername("member5").get(0);
+
+        assertThat(resultCount).isEqualTo(3);
+        assertThat(member5.getAge()).isEqualTo(41);
     }
 }

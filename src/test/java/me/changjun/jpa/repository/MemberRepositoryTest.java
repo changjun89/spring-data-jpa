@@ -320,4 +320,24 @@ class MemberRepositoryTest {
 
         assertThat(result.size()).isEqualTo(1);
     }
+
+    @Test
+    void projections() {
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member memberA = new Member("m1", 0, teamA);
+        Member memberB = new Member("m2", 0, teamA);
+        em.persist(memberA);
+        em.persist(memberB);
+
+        em.flush();
+        em.clear();
+
+        List<UsernameOnlyDto> result = memberRepository.findProjectionsByUsername("m1");
+
+        for (UsernameOnlyDto usernameOnly : result) {
+            System.out.println("useNameOnly=" + usernameOnly.getUsername());
+        }
+    }
 }

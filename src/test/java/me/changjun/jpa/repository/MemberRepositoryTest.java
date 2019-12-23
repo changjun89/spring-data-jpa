@@ -340,4 +340,25 @@ class MemberRepositoryTest {
             System.out.println("useNameOnly=" + usernameOnly.getUsername());
         }
     }
+
+    @Test
+    void nativeQueryTest() {
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member memberA = new Member("m1", 0, teamA);
+        Member memberB = new Member("m2", 0, teamA);
+        em.persist(memberA);
+        em.persist(memberB);
+
+        em.flush();
+        em.clear();
+
+        Page<MemberProjection> byNativeProjection = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = byNativeProjection.getContent();
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection team Name = " + memberProjection.getTeamName());
+            System.out.println("memberProjection user name = " + memberProjection.getUserName());
+        }
+    }
 }
